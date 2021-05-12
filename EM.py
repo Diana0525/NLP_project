@@ -26,18 +26,21 @@ def review_to_wordlist(review):
 #“delimiter=\t”表示字段由\t分割, quoting=3告诉Python忽略双引号
 
 
-train_origin = pd.read_csv(r'D:\\cnn\\NLP\\train_data.csv', header=0, delimiter=";", quoting=3)
-unlabeled_origin = pd.read_csv(r'D:\\cnn\\NLP\\unlabel_data.csv', header=0, delimiter=",")
-test_origin = pd.read_csv(r'D:\\cnn\\NLP\\test1_data.csv', header=0, delimiter=",")
+train_origin = pd.read_csv(r'D:\\cnn\\NLP\\NLP_project\\train_data.csv', header=0, delimiter=";", quoting=3)
+unlabeled_origin = pd.read_csv(r'D:\\cnn\\NLP\\NLP_project\\unlabel_data.csv', header=0, delimiter=",")
+test_origin = pd.read_csv(r'D:\\cnn\\NLP\\NLP_project\\test1_data.csv', header=0, delimiter=",")
+test2_origin = pd.read_csv(r'D:\\cnn\\NLP\\NLP_project\\test2_data.csv', header=0, delimiter=",")
 #预览数据
 # 取出情感标签，positive/褒 或者 negative/贬
 #使用中文分词构造文本，便于tf-idf
 train_origin_text = train_origin['text'][0:1000]
 unlabeled_origin_text = unlabeled_origin['text'][0:99999]
 test_origin_text = test_origin['text'][0:1000]
+test2_origin_text = test2_origin['text'][0:2000]
 train_text = []
 unlabeled_text = []
 test_text = []
+test2_text = []
 # 将训练和测试数据都转成词list
 for stri in train_origin_text:
     seg_list = jieba.cut(stri,use_paddle=True) # 使用paddle模式
@@ -49,6 +52,10 @@ for stri in unlabeled_origin_text:
 for stri in test_origin_text:
     seg_list = jieba.cut(stri,use_paddle=True)
     test_text.append(' '.join(list(seg_list)))
+
+for stri in test2_origin_text:
+    seg_list = jieba.cut(stri,use_paddle=True)
+    test2_text.append(' '.join(list(seg_list)))
 
 train_label = []
 for i in range(0,1000):
@@ -65,9 +72,10 @@ tfv = TFIV(min_df=3,  strip_accents='unicode', analyzer='word',ngram_range=(1, 2
 tfv.fit(train_text)
 
 
-X_all = train_text + unlabeled_text +test_text
+X_all = train_text + unlabeled_text +test_text + test2_text
 len_train = len(train_text)
 len_unlabeled = len(unlabeled_text)
+len_test = len(test_text)
 X_all = tfv.transform(X_all)
  
  
@@ -75,8 +83,8 @@ X_all = tfv.transform(X_all)
 # 左闭右开
 train_X = X_all[:len_train]
 unlabeled_X = X_all[len_train:len_train+len_unlabeled]
-test_X = X_all[len_train+len_unlabeled:]
-
+test_X = X_all[len_train+len_unlabeled:len_train+len_unlabeled+len_test]
+test2_X = X_all[len_train+len_unlabeled+len_test:]
 MNB(alpha=1.0, class_prior=None, fit_prior=True)
 '''
 alpha ： float，optional（默认值= 1.0）
@@ -93,13 +101,14 @@ model_NB.fit(train_X, train_label) #特征数据直接灌进来
 print("predict")
 unlabeled_label = model_NB.predict(unlabeled_X)
 test_label = model_NB.predict(test_X)
-print(unlabeled_label[0:20])
-print("text")
-print(unlabeled_origin_text[0:20])
-print("predict")
-print(model_NB.predict(test_X)[0:20])
-print("text")
-print(test_origin_text[0:20])
+test2_label = model_NB.predict(test2_X)
+# print(unlabeled_label[0:20])
+# print("text")
+# print(unlabeled_origin_text[0:20])
+# print("predict")
+# print(model_NB.predict(test_X)[0:20])
+# print("text")
+# print(test_origin_text[0:20])
 
 #EM Test
 '''
@@ -129,20 +138,26 @@ unlabeled_label = model_NB.predict(unlabeled_X)
 model_NB.fit(unlabeled_X, unlabeled_label)
 unlabeled_label = model_NB.predict(unlabeled_X)
 
-print("predict")
+
 unlabeled_label = model_NB.predict(unlabeled_X)
 test_label = model_NB.predict(test_X)
-print(len(test_label))
-print(unlabeled_label[0:20])
-print("text")
-print(unlabeled_origin_text[0:20])
-print("predict")
-print(model_NB.predict(test_X)[0:20])
-print("text")
-print(test_origin_text[0:20])
+test2_label = model_NB.predict(test2_X)
+print("text:")
+print(test2_origin_text[0:20])
+print("predict:")
+print(test2_label[0:20])
+# print(len(test_label))
+# print(unlabeled_label[0:20])
+# print("text")
+# print(unlabeled_origin_text[0:20])
+# print("predict")
+# print(model_NB.predict(test_X)[0:20])
+# print("text")
+# print(test_origin_text[0:20])
 
+# 对test的1000条数据写出预测结果
 result = []
-for i in test_label:
+for i in test2_label:
     if i == 'positive':
         result.append(1)
     elif i == 'negative':
