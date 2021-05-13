@@ -155,7 +155,7 @@ print(test2_label[0:20])
 # print("text")
 # print(test_origin_text[0:20])
 
-# 对test的1000条数据写出预测结果
+# 对testB的20000条数据写出预测结果
 result = []
 for i in test2_label:
     if i == 'positive':
