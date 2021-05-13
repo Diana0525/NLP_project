@@ -36,7 +36,7 @@ test2_origin = pd.read_csv(r'D:\\cnn\\NLP\\NLP_project\\test2_data.csv', header=
 train_origin_text = train_origin['text'][0:1000]
 unlabeled_origin_text = unlabeled_origin['text'][0:99999]
 test_origin_text = test_origin['text'][0:1000]
-test2_origin_text = test2_origin['text'][0:2000]
+test2_origin_text = test2_origin['text'][0:20000]
 train_text = []
 unlabeled_text = []
 test_text = []
